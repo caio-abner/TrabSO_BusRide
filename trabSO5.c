@@ -35,8 +35,8 @@ int idOnibus    = 0;
 
 sem_t semaforoPontoDeOnibus[MAX];
 sem_t multex1,multex2,multex3,multex4,multex5;
-passageiro listaPassageiros[MAX];
-onibusSTC onibus[MAX]; 
+passageiro* listaPassageiros;
+onibusSTC* onibus; 
 
 void* funcPassageiro(void *arg){    // responsavel por produzir os passageiros
     //pessageiro é criado e inserido nos pontos
@@ -159,6 +159,8 @@ int main(){
     sem_init(&multex3,0,1);
     sem_init(&multex4,0,1);
     sem_init(&multex5,0,1);
+    listaPassageiros = (passageiro*) malloc(p*sizeof(passageiro));
+    onibus =(onibusSTC*)malloc(c*sizeof(onibus));
     pthread_t onibus[c];
     pthread_t passageiros[p];
 
