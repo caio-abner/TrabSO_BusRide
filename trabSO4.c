@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <semaphore.h>
-#define MAX 10000
+#define MAX 1000000
 
 typedef struct psg{
     int id;                         //ondeEstou : 
@@ -32,8 +32,8 @@ int idOnibus    = 0;
 
 sem_t semaforoPontoDeOnibus[MAX];
 sem_t multex1,multex2,multex3,multex4,multex5;
-passageiro listaPassageiros[MAX];
-onibusSTC onibus[MAX]; 
+passageiro* listaPassageiros;
+onibusSTC* onibus; 
 
 void* funcPassageiro(void *arg){    // responsavel por produzir os passageiros
     //pessageiro é criado e inserido nos pontos
@@ -74,6 +74,7 @@ void* funcPassageiro(void *arg){    // responsavel por produzir os passageiros
             break;
         }
     }
+    usleep(rand()*10);  //o resolve o que precisa
     pthread_exit(NULL);
 }
 
@@ -119,14 +120,21 @@ void* funcaoOnibus(void* arg){
 int main(){
     srand((unsigned int)time(NULL));
     //Declarando Variaveis  
-    printf("Digite a quantidade de pontos de onibus: ");
+    //printf("Digite a quantidade de pontos de onibus: ");
     scanf("%d %d %d %d", &s,&c,&p,&a);
     printf("s:%d    c:%d    p:%d    a:%d\n",s,c,p,a);
+    if(p<=a || p<=c || a<=c ){
+        printf("entrada invalidaz\n");
+        return -1;
+    }
     sem_init(&multex1,0,1);
     sem_init(&multex2,0,1);
     sem_init(&multex3,0,1);
     sem_init(&multex4,0,1);
     sem_init(&multex5,0,1);
+    listaPassageiros = (passageiro*) malloc(p*sizeof(passageiro));
+    onibus =(onibusSTC*)malloc(c*sizeof(onibus));
+    //semaforoPontoDeOnibus = (sem_t*)malloc(3*s*sizeof(sem_t));
     pthread_t onibus[c];
     pthread_t passageiros[p];
 
