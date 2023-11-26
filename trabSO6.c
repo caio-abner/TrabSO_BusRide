@@ -13,6 +13,9 @@ typedef struct psg{
     int ondeEstou;                  //    1  = onibus 1
     int flagEspera;                 //    n  = onibus n
                                     //    -2 = chegou no destino
+    time_t tempoChegadaPonto;
+    time_t tempoEntradaBus;
+    time_t tempoDescidaBus;
 }passageiro;
 
 typedef struct obs{                 //OndeEstou:
