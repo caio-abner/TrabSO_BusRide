@@ -47,17 +47,20 @@ void produzOutput(passageiro psg){
     sem_wait(&multex5);
 
     FILE *tracePsg;
+    double tChegada,tEmbarq,TDesembarq;
+    tChegada = difftime(psg.tempoChegadaPonto,inicio);
+    tEmbarq = difftime(psg.tempoEntradaBus,inicio);
+    TDesembarq = difftime(psg.tempoDescidaBus,inicio);
     
     char nomeArquivo[50];
     sprintf(nomeArquivo, "passageiro%d.trace", psg.id);
-
+    
     tracePsg = fopen(nomeArquivo,"w");
     if (tracePsg == NULL){
       exit (0);
     }
 
-    fprintf(tracePsg, "%ld | %ld | %ld | %d", psg.tempoChegadaPonto, psg.tempoEntradaBus, psg.tempoDescidaBus, psg.pontoVaiDescer);
-    
+    fprintf(tracePsg, "%.2f | %.2f | %.2f | %d", tChegada,tEmbarq,TDesembarq, psg.pontoVaiDescer);
     fclose(tracePsg);
 
     sem_post(&multex5);
@@ -97,14 +100,14 @@ void* funcAnimacao(void* arg){
                 usleep(90000);
             }
         }
-        printf("-------------------------------------------------------------------\n");
+        printf("\n-------------------------------------------------------------------\n");
         printf("Onibus--------------------------------------------------------\n");
         for(int i=0;i<idOnibus;i++){
             printf("Onibus %d esta passando no ponto %d\n",
             onibus[i].id,onibus[i].ondeEstou);
             usleep(90000);
         }
-        printf("-------------------------------------------------------------------\n");
+        printf("\n-------------------------------------------------------------------\n");
         
         //libera os semaforos para o cogigo volta a executar
         sem_post(&multex5);
