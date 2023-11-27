@@ -1,3 +1,17 @@
+//Primeiro Trabalho Pratico de Sistemas Operacionais I (2023) - USP/ICMC
+//Integrantes do Grupo 03:
+//  - Caio Abner Soares Araujo (4822220)
+//  - Heitor Pupim Assunção Toledo (11372858)
+//  - Pedro Henrique Cruz da Silva (11833236)
+//  - Pedro Santos Souza (12567502)
+//  - Pedro Zambrozi Brunhara (12608664)
+
+//Para compilar o programa: gcc trabSO7.c -o trabSO7 -pthread
+//Para executar o programa: ./trabSO7
+
+//Para executar o programa, digite o número de pontos de ônibus (S), o número de ônibus (C), o número de passageiros (P)
+//e o número de assentos em cada ônibus (A) no formato "S C P A"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
@@ -8,10 +22,10 @@
 
 typedef struct psg{
     int id ;                         //ondeEstou : 
-    int pontoVaiSubir;              //    -1 = ponto de onibus inicial
-    int pontoVaiDescer;             //    0  = onibus 0
-    int ondeEstou;                  //    1  = onibus 1
-    int flagEspera;                 //    n  = onibus n
+    int pontoVaiSubir;              //    -1 = ponto de ônibus inicial
+    int pontoVaiDescer;             //    0  = ônibus 0
+    int ondeEstou;                  //    1  = ônibus 1
+    int flagEspera;                 //    n  = ônibus n
     int flagCriado;                 //    -2 = chegou no destino
     int onibus;
     time_t tempoChegadaPonto;
@@ -20,14 +34,14 @@ typedef struct psg{
 }passageiro;
 
 typedef struct obs{                 //OndeEstou:
-    int id;                         //    0  = ponto de onibus 0 
-    int ondeEstou;                  //    n  = ponto de onibus n
+    int id;                         //    0  = ponto de ônibus 0
+    int ondeEstou;                  //    n  = ponto de ônibus n
     int acetosLivres;              //    -1 = se locomovendo entre pontos 
 }onibusSTC;
 /*
-Como nos exemplos do livro Sistemas Operacionais Modernos presentes nas figuras
-2.28 e 2.32 e o exemplo "prodcons_1_thread_sem.c" fornecido pelo professor possuiem 
-variaveris glabais optamos por seguir o mesmo padrao
+Como os exemplos do livro Sistemas Operacionais Modernos (presentes nas figuras
+2.28 e 2.32) e o exemplo "prodcons_1_thread_sem.c" fornecido pelo professor possuem
+variáveis globais, optamos por seguir o mesmo padrão.
 */
 int s,c,p,a;
 int idPassag    = 0;
@@ -40,7 +54,8 @@ passageiro* listaPassageiros;
 onibusSTC* onibus; 
 time_t inicio;
 
-//funcao pra gerar arquivo trace de cada passageiro, contendo o horario de chegada no ponto, horario de entrada/saida do onibus e o ponto de destino
+//função pra gerar arquivo trace de cada passageiro, contendo o horário de chegada no ponto,
+//horário de entrada/saida do ônibus e o ponto de destino
 void produzOutput(passageiro psg){
     sem_wait(&multex2);
     sem_wait(&multex1);
@@ -61,9 +76,8 @@ void produzOutput(passageiro psg){
       exit (0);
     }
     fprintf(tracePsg, 
-        "horário que chegou no ponto de origem %d, horário que entrou no ônibus %d, horário que desceu do ônibus %d,ponto de destino %d que desceu\n",
-        psg.pontoVaiSubir,psg.onibus,psg.onibus,psg.pontoVaiDescer);
-    fprintf(tracePsg, "%.2f | %.2f | %.2f | %d", tChegada,tEmbarq,TDesembarq, psg.pontoVaiDescer);
+        "Horário que chegou no ponto de origem %d: %.4f\nHorário que entrou no ônibus %d: %.4f\nHorário que desceu do ônibus %d: %.4f\nPonto de destino que desceu: %d\n",
+        psg.pontoVaiSubir,tChegada,psg.onibus,tEmbarq,psg.onibus,TDesembarq,psg.pontoVaiDescer);
     fclose(tracePsg);
 
     sem_post(&multex5);
@@ -76,8 +90,8 @@ void* funcAnimacao(void* arg){
     int count =0;
     while (1)
     {
-        //pega os semaforos para parar o codigo e imprimir o estado 
-        //dos passageiro e dos onibus
+        //pega os semáforos para parar o código e imprimir o estado
+        //dos passageiros e dos ônibus
         sem_wait(&multex2); 
         sem_wait(&multex1);
         sem_wait(&multex3);
@@ -112,28 +126,29 @@ void* funcAnimacao(void* arg){
         }
         printf("\n-------------------------------------------------------------------\n");
         
-        //libera os semaforos para o cogigo volta a executar
+        //libera os semáforos para o código voltar a executar
         sem_post(&multex5);
         sem_post(&multex3);
         sem_post(&multex1);
         sem_post(&multex2);
         usleep(70000);
-        if(processados >= p)break; //condição de saida do loop
+        if(processados >= p)break; //condição de saída do loop
     }
     pthread_exit(NULL);
 }
 
-void* funcPassageiro(void *arg){    // responsavel por produzir os passageiros
-    //pessageiro é criado e inserido nos pontos
+//função responsável por produzir os passageiros
+void* funcPassageiro(void *arg){
+    //passageiro é criado e inserido nos pontos
     int id;
     time_t tempo;
-    //garante q 2 passageiro não tenham o mesmo id
+    //garante que 2 passageiros não tenham o mesmo id
     sem_wait(&multex2);  
     id = idPassag;
     idPassag++;
     sem_post(&multex2);
 
-    //proteje o array de passageiro
+    //protege o array de passageiros
     sem_wait(&multex1);
     listaPassageiros[id].id = id;
     listaPassageiros[id].pontoVaiSubir = rand() % s;
@@ -144,7 +159,7 @@ void* funcPassageiro(void *arg){    // responsavel por produzir os passageiros
     listaPassageiros[id].flagCriado = 1;
     sem_post(&multex1);
     
-    while (1) // espera ocupada
+    while (1) //espera ocupada
     {
         if(listaPassageiros[id].flagEspera) break;
     }
@@ -152,15 +167,15 @@ void* funcPassageiro(void *arg){    // responsavel por produzir os passageiros
     int aux;
     while (1)
     {   
-        //se o onibus esta onde o passageiro vai descer
+        //verifica se o ônibus esta onde o passageiro vai descer
         if(listaPassageiros[id].pontoVaiDescer == onibus[listaPassageiros[id].ondeEstou].ondeEstou){
             aux = listaPassageiros[id].ondeEstou;
-            sem_wait(&multex1); //proteje o array de passageiro
-            listaPassageiros[id].ondeEstou = -2; //flag q o passageiro desceu do onibus
+            sem_wait(&multex1); //protege o array de passageiros
+            listaPassageiros[id].ondeEstou = -2; //flag indicando que o passageiro desceu do ônibus
             time(&listaPassageiros[id].tempoDescidaBus);
-            sem_wait(&multex4);//proteje o numero de acentos lives do onibus
+            sem_wait(&multex4);//protege o número de assentos livres do ônibus
             onibus[aux].acetosLivres++;
-            processados++; //numero de passageiros que desceram do onibus
+            processados++; //número de passageiros que desceram do ônibus
             sem_post(&multex4);
             sem_post(&multex1);
             break;
@@ -176,7 +191,7 @@ void* funcaoOnibus(void* arg){
     int aux = rand();
     int esseOnibus;
     clock_t tempo;
-    //garante q 2 onibus não tenham o mesmo id
+    //garante que 2 ônibus não tenham o mesmo id
     sem_wait(&multex3);
     esseOnibus= idOnibus;
     idOnibus++;
@@ -189,9 +204,9 @@ void* funcaoOnibus(void* arg){
     while(1){
         aux++;
         onibus[esseOnibus].ondeEstou = aux % s;
-        if(sem_trywait(&semaforoPontoDeOnibus[(aux%s)])){//tenta entrar no ponto de onibus
+        if(sem_trywait(&semaforoPontoDeOnibus[(aux%s)])){//tenta entrar no ponto de ônibus
             for(int i=0; i<p ;i++){
-                //garante q apenas um passageiro por vez ira tenta embarcar
+                //garante que apenas um passageiro por vez irá tentar embarcar
                 sem_wait(&multex5);
                 if(listaPassageiros[i].pontoVaiSubir == onibus[esseOnibus].ondeEstou &&
                 listaPassageiros[i].ondeEstou == -1 &&
@@ -205,7 +220,7 @@ void* funcaoOnibus(void* arg){
                 sem_post(&multex5);
             }
             sem_post(&semaforoPontoDeOnibus[aux%s]);
-            // libera o semaforo do ponto de onibus    
+            //libera o semáforo do ponto de ônibus
         } 
         if(processados >= p)break;
     }
@@ -215,7 +230,7 @@ void* funcaoOnibus(void* arg){
 int main(){
     srand((unsigned int)time(NULL));
     time(&inicio);
-    //Declarando Variaveis--------------- 
+    //Declarando Variáveis---------------
     int aux; 
     aux = scanf("%d %d %d %d", &s,&c,&p,&a);
     if (aux != 4){  //testando se a entrada é valida
@@ -254,10 +269,10 @@ int main(){
             printf("Oops. pthread create returned error code %d\n", status);
             exit(-1);
         }
-    }   
-   
-    //---------------------------------------------
-   //Inicializando as Threads do Onibus
+    }
+
+   //------------------------------------------------------------------------------------
+   //Inicializando as Threads do Ônibus
 
     for(int i=0;i<c;i++){
         status =pthread_create(&onibus[i], NULL, (void*)funcaoOnibus,(void*) &semaforoPontoDeOnibus );
@@ -266,7 +281,8 @@ int main(){
             exit(-1);
         }
     }
-    //---------------------------------------------
+
+    //------------------------------------------------------------------------------------
     //Inicializando as Threads da animação--------------------------------------
 
     status =pthread_create(&animacao, NULL, (void*)funcAnimacao,(void*) &semaforoPontoDeOnibus );
@@ -275,7 +291,7 @@ int main(){
         exit(-1);
     }
 
-   //-----------------------------------------------
+   //------------------------------------------------------------------------------------
 
 
     for(int i=0;i<c;i++){
