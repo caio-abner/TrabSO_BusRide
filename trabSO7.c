@@ -13,6 +13,7 @@ typedef struct psg{
     int ondeEstou;                  //    1  = onibus 1
     int flagEspera;                 //    n  = onibus n
     int flagCriado;                 //    -2 = chegou no destino
+    int onibus;
     time_t tempoChegadaPonto;
     time_t tempoEntradaBus;
     time_t tempoDescidaBus;
@@ -59,7 +60,9 @@ void produzOutput(passageiro psg){
     if (tracePsg == NULL){
       exit (0);
     }
-
+    fprintf(tracePsg, 
+        "horário que chegou no ponto de origem %d, horário que entrou no ônibus %d, horário que desceu do ônibus %d,ponto de destino %d que desceu\n",
+        psg.pontoVaiSubir,psg.onibus,psg.onibus,psg.pontoVaiDescer);
     fprintf(tracePsg, "%.2f | %.2f | %.2f | %d", tChegada,tEmbarq,TDesembarq, psg.pontoVaiDescer);
     fclose(tracePsg);
 
@@ -195,6 +198,7 @@ void* funcaoOnibus(void* arg){
                 onibus[esseOnibus].acetosLivres > 0){
                     listaPassageiros[i].flagEspera = 1;
                     listaPassageiros[i].ondeEstou = esseOnibus;
+                    listaPassageiros[i].onibus = esseOnibus;
                     time(&listaPassageiros[i].tempoEntradaBus);
                     onibus[esseOnibus].acetosLivres --;
                 }
